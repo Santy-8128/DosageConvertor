@@ -1,27 +1,12 @@
-Minimac3 is a lower memory and more computationally efficient
-implementation of the genotype imputation algorithms in 
-minimac and minimac2.
+DosageConvertor is a C++ tool to convert dosage files (in VCF format) from Minimac3 to ther formats such as MaCH or PLINK.
 
-<<< SEE http://genome.sph.umich.edu/wiki/Minimac3 FOR DOCUMENTATION >>>
+<<< SEE http://genome.sph.umich.edu/wiki/DosageConvertor FOR DOCUMENTATION >>>
 
-Users should follow the following steps to compile Minimac3 
-(if they downloaded the source files) or should skip them
-(if they downloaded the binary executable).
+ Usage: ./DosageConvertor  --vcfDose    TestDataImputedVCF.dose.vcf.gz
+                           --info       TestDataImputedVCF.info
+                           --prefix     OutputFilePrefix
+                           --type       plink OR mach   // depending on output format
+                           --format     DS or GP        // based on if you want to output
+                                                        // dosage (DS) or genotype prob (GP)
 
-## EXTRACT MINIMAC3 AND COMPILE
- 
-tar -xzvf Minimac3.v1.tar.gz
-cd Minimac3/
-make
-
-A typical Minimac3 command line for imputation is as follows
-
-../bin/Minimac3 --refHaps refPanel.vcf \ 
-                --haps targetStudy.vcf \
-                --prefix testRun
-
-Here refPanel.vcf is the reference panel used in VCF format (e.g. 1000 Genomes), 
-targetStudy.vcf is the phased GWAS data in VCF format, 
-and testRun is the prefix for the output files.
-
-<<< SEE http://genome.sph.umich.edu/wiki/Minimac3 FOR DOCUMENTATION>>>
+<<< SEE http://genome.sph.umich.edu/wiki/DosageConvertor FOR DOCUMENTATION >>>
