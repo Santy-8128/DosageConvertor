@@ -122,12 +122,34 @@ bool HaplotypeSet::WriteMachFile()
 
                 char *end_str9;
                 pch = strtok_r ((char*)line.c_str(),"\t", &end_str1);
-                chr=pch;
+                if(pch==NULL)
+                {
+                    cout<<"\n Input VCF file has invalid format at Marker No : "<<totmarkerCount+1<<endl;
+                    cout<<" Please verify the following file : "<<filename<<endl;
+                    return false;
+                }
+                else
+                    chr=pch;
                 pch = strtok_r (NULL, "\t", &end_str1);
 
-                bp=atoi(pch);
+                if(pch==NULL)
+                {
+                    cout<<"\n Input VCF file has invalid format at Marker No : "<<totmarkerCount+1<<endl;
+                    cout<<" Please verify the following file : "<<filename<<endl;
+                    return false;
+                }
+                else
+                    bp=atoi(pch);
+
                 pch = strtok_r (NULL, "\t", &end_str1);
-                name=pch;
+                if(pch==NULL)
+                {
+                    cout<<"\n Input VCF file has invalid format at Marker No : "<<totmarkerCount+1<<endl;
+                    cout<<" Please verify the following file : "<<filename<<endl;
+                    return false;
+                }
+                else
+                    name=pch;
                 variant tempVariant(name,chr,bp);
 
                 pch = strtok_r (NULL, "\t", &end_str1);
@@ -169,6 +191,15 @@ bool HaplotypeSet::WriteMachFile()
                     pch_split = strtok_r (NULL, ":", &end_str9);
                 }
 
+
+
+                if(!DS && !GP && !GT)
+                {
+                    cout<<"\n Input VCF file has NONE of the following fields : GT, DS or GP "<<endl;
+                    cout<<" VCF file must have at least one of these fields to work !!! "<<endl;
+                    cout<<" Please check the following file : "<<filename<<endl;
+                    return false;
+                }
 
                 int indCount=0;
 
@@ -586,7 +617,7 @@ bool HaplotypeSet::LoadInfoFile(String filename)
 
 
 
-
+    int RowNo=1;
 
     string line;
     if(ifs)
@@ -596,20 +627,60 @@ bool HaplotypeSet::LoadInfoFile(String filename)
         while ((ifs->readLine(line))!=-1)
         {
 
+            RowNo++;
             pch = strtok_r ((char*)line.c_str(),"\t", &end_str1);
-            name=pch;
+
+            if(pch==NULL)
+            {
+                cout<<"\n Info file does NOT have 14 columns at Row : "<<RowNo<<endl;
+                cout<<" Please verify the following file : "<<filename<<endl;
+                return false;
+            }
+            else
+                name=pch;
 
             variant tempVariant(name,chr,bp);
 
 
             pch = strtok_r (NULL, "\t", &end_str1);
-            refAlleleString=pch;
+            if(pch==NULL)
+            {
+                cout<<"\n Info file does NOT have 14 columns at Row : "<<RowNo<<endl;
+                cout<<" Please verify the following file : "<<filename<<endl;
+                return false;
+            }
+            else
+                refAlleleString=pch;
+
             pch = strtok_r (NULL, "\t", &end_str1);
-            altAlleleString=pch;
+            if(pch==NULL)
+            {
+                cout<<"\n Info file does NOT have 14 columns at Row : "<<RowNo<<endl;
+                cout<<" Please verify the following file : "<<filename<<endl;
+                return false;
+            }
+            else
+                altAlleleString=pch;
+
             pch = strtok_r (NULL, "\t", &end_str1);
-            MajAlleleString=pch;
+            if(pch==NULL)
+            {
+                cout<<"\n Info file does NOT have 14 columns at Row : "<<RowNo<<endl;
+                cout<<" Please verify the following file : "<<filename<<endl;
+                return false;
+            }
+            else
+                MajAlleleString=pch;
+
             pch = strtok_r (NULL, "\t", &end_str1);
-            MinAlleleString=pch;
+            if(pch==NULL)
+            {
+                cout<<"\n Info file does NOT have 14 columns at Row : "<<RowNo<<endl;
+                cout<<" Please verify the following file : "<<filename<<endl;
+                return false;
+            }
+            else
+                MinAlleleString=pch;
 
             tempVariant.assignRefAlt(refAlleleString,altAlleleString);
             tempVariant.assignMajMin(MajAlleleString,MinAlleleString);
