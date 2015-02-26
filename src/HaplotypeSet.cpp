@@ -8,7 +8,7 @@ bool HaplotypeSet::WriteMachFile()
 	VcfHeader header;
 	VcfRecord record;
     individualName.clear();
-
+    familyName.clear();
     String filename=VcfDose;
     int numSamplesRead = 0,markerCount=0,totmarkerCount=0,NumGP=0,NumDS=0,NumGT=0;
     if (!inFile.open(filename, header))
@@ -20,14 +20,77 @@ bool HaplotypeSet::WriteMachFile()
     inFile.setSiteOnly(false);
 	numSamplesRead = header.getNumSamples();
     numSamples=numSamplesRead;
+    char * pch_split,* pch_split3;
+    char * pch;
+    char *end_str1,*end_str3;
+
+
+    if(numSamplesRead==0)
+    {
+        std::cout << "\n Number of Samples read from VCF File    : " << numSamplesRead << endl;
+        std::cout << "\n ERROR !!! "<<endl;
+        cout << "\n NO samples found in VCF File !! \n Please Check Input File !!!  "<< endl;
+        return false;
+    }
+
     for (int i = 0; i < numSamplesRead; i++)
 	{
 		string tempName(header.getSampleName(i));
-		individualName.push_back(tempName);
+
+		if(IdDelimiter=="")
+        {
+            individualName.push_back(tempName);
+            familyName.push_back(tempName);
+        }
+		else
+        {
+
+            size_t pos = 0;
+            std::string delimiter(IdDelimiter) ;
+            std::string token;
+            int Count=0;
+            string temptempName=tempName;
+
+            while ((pos = tempName.find(delimiter)) != std::string::npos)
+            {
+                token = tempName.substr(0, pos);
+
+                if(Count==0)
+                    familyName.push_back(token);
+
+                tempName.erase(0, pos + delimiter.length());
+                if(Count==1)
+                {
+                    std::cout << "\n ERROR !!! "<<endl;
+                    cout << "\n Program could NOT parse the following sample name with ID delimiter ["<< IdDelimiter<<"] : " << temptempName << endl;
+                    cout<<    " More than TWO tokens found : ["<<familyName.back()  <<"] ["
+                    <<token << "] ["<<tempName  <<"] " <<endl;
+                    cout << "\n Please verify ID Delimitier : [" << IdDelimiter <<"]"<< endl;
+                    return false;
+                }
+
+                Count++;
+
+
+            }
+            if(Count==0)
+            {
+                std::cout << "\n ERROR !!! "<<endl;
+                cout << "\n Program could NOT parse the following sample name with ID delimiter ["<< IdDelimiter<<"] : " << temptempName << endl;
+                cout<<    " Delimiter NOT FOUND in Sample Name !!! " <<endl;
+                cout << "\n Please verify ID Delimitier : [" << IdDelimiter <<"]"<< endl;
+                return false;
+            }
+
+            individualName.push_back(tempName);
+        }
     }
 
     IFILE machPartial=NULL,plinkMain=NULL,plinkMap=NULL;
     int part=1;
+
+     std::cout << "\n Number of Samples read from VCF File    : " << numSamplesRead << endl;
+
 
     if(Type=="mach")
         machPartial = ifopen(outFile + ".output.part.0" + (gzip ? ".gz" : ""), "wb", gzip ?InputFile::BGZF:InputFile::UNCOMPRESSED);
@@ -36,7 +99,7 @@ bool HaplotypeSet::WriteMachFile()
         plinkMain = ifopen(outFile + ".plink.fam", "wb",InputFile::UNCOMPRESSED);
         for (int i = 0; i < numSamplesRead; i++)
         {
-             ifprintf(plinkMain,"%s\t%s\t0\t0\t0\t-9\n",individualName[i].c_str(),individualName[i].c_str());
+             ifprintf(plinkMain,"%s\t%s\t0\t0\t0\t-9\n",familyName[i].c_str(),individualName[i].c_str());
         }
         ifclose(plinkMain);
         plinkMap = ifopen(outFile + ".plink.map", "wb",InputFile::UNCOMPRESSED);
@@ -45,19 +108,16 @@ bool HaplotypeSet::WriteMachFile()
         ifprintf(plinkMain,"SNP\tA1\tA2");
         for (int i = 0; i < numSamplesRead; i++)
         {
-             ifprintf(plinkMain,"\t%s\t%s",individualName[i].c_str(),individualName[i].c_str());
+             ifprintf(plinkMain,"\t%s\t%s",familyName[i].c_str(),individualName[i].c_str());
         }
         ifprintf(plinkMain,"\n");
     }
 
-    char * pch_split,* pch_split3;
-    char * pch;
-    char *end_str1,*end_str3;
 
     if(Type=="mach")
         for (int i = 0; i < numSamplesRead; i++)
         {
-             ifprintf(machPartial,"%s\tDOSE\n",individualName[i].c_str());
+             ifprintf(machPartial,"%s->%s\tDOSE\n",familyName[i].c_str(),individualName[i].c_str());
         }
 
     if(Type=="mach")
@@ -68,27 +128,41 @@ bool HaplotypeSet::WriteMachFile()
     int bp;
     string chr;
 
-    int bufferSize=100000;
+    int bufferSize=BufferSize;
+    if(Type=="plink")
+        bufferSize=1;
 
-    dosage.resize(bufferSize);
-    for (int i = 0; i < bufferSize; i++)
+    dosage.clear();
+    GP1.clear();
+    GP2.clear();
+
+    if(Format=="DS")
     {
-         dosage[i].resize(numSamplesRead,-9.0);
+        dosage.resize(bufferSize);
+        for (int i = 0; i < bufferSize; i++)
+        {
+             dosage[i].resize(numSamplesRead,-9.0);
+        }
     }
 
 
-    GP1.resize(bufferSize);
-    GP2.resize(bufferSize);
-    for (int i = 0; i < bufferSize; i++)
+    if(Format=="GP")
     {
-        GP1[i].resize(numSamplesRead,-9.0);
-        GP2[i].resize(numSamplesRead,-9.0);
+        GP1.resize(bufferSize);
+        GP2.resize(bufferSize);
+        for (int i = 0; i < bufferSize; i++)
+        {
+            GP1[i].resize(numSamplesRead,-9.0);
+            GP2[i].resize(numSamplesRead,-9.0);
+        }
     }
-
-
+    int factor=10000;
 
     IFILE DoseRead = ifopen(filename, "r");
     string line;
+
+    std::cout << "\n Reading and Importing Data from VCF File ..."<<endl<<endl ;
+
     if(DoseRead)
     {
         bool Header=true;
@@ -106,8 +180,6 @@ bool HaplotypeSet::WriteMachFile()
         while(line.compare("")!=0)
         {
             markerCount=0;
-
-            printf("    Reading Chunk %d of %d markers ... \n", part, bufferSize);
 
             while(markerCount<bufferSize && line.compare("")!=0)
             {
@@ -150,6 +222,17 @@ bool HaplotypeSet::WriteMachFile()
                 }
                 else
                     name=pch;
+
+                if(VariantList[totmarkerCount].name!=name)
+                {
+                    std::cout << "\n ERROR !!! Mismatching variant name between VCF and INFO file !!!" ;
+                    std::cout << "\n           Marker #"<<totmarkerCount+1 <<" ["<<name<<"] in VCF file does NOT match with"<<
+                    " Marker #"<<totmarkerCount+1 <<" ["<<VariantList[totmarkerCount].name <<"] in INFO file" ;
+                    std::cout << "\n           Please use info file from same imputation run !!! " << endl;
+                    return false;
+                }
+
+
                 variant tempVariant(name,chr,bp);
 
                 pch = strtok_r (NULL, "\t", &end_str1);
@@ -223,10 +306,12 @@ bool HaplotypeSet::WriteMachFile()
                                     pch_split3 = strtok_r (pch_split,",",
                                                         &end_str3);
 
-                                    GP1[markerCount][indCount]=atof(pch_split3);
+
+
+                                    double GP11=atof(pch_split3);
                                     pch_split3 = strtok_r (NULL,",", &end_str3);
-                                    GP2[markerCount][indCount]=atof(pch_split3);
-                                    dosage[markerCount][indCount]=GP2[markerCount][indCount]+(2*(1-GP1[markerCount][indCount]-GP2[markerCount][indCount]));
+                                    double GP22=atof(pch_split3);
+                                    dosage[markerCount][indCount]=GP22+(2*(1-GP11-GP22));
                                 }
                             if(Format=="GP")
                                 if(gpIndex==index)
@@ -362,14 +447,6 @@ bool HaplotypeSet::WriteMachFile()
                 if(Type=="plink")
                 {
 
-                    if(markerCount==bufferSize-1)
-                    {
-                        if(Format=="DS")
-                            printf("    Writing Chunk %d of %d markers to PLINK Dosage Format ... \n", part, bufferSize);
-                        else
-                            printf("    Writing Chunk %d of %d markers to PLINK GP Format ... \n", part, bufferSize);
-                    }
-
                     ifprintf(plinkMap,"%s\t%s\t0\t%d\n",VariantList[totmarkerCount].chr.c_str(),
                              VariantList[totmarkerCount].name.c_str(),
                              VariantList[totmarkerCount].bp);
@@ -393,28 +470,38 @@ bool HaplotypeSet::WriteMachFile()
                 DoseRead->readLine(line);
             }
 
+            if(Type=="plink")
+            {
+                if(totmarkerCount%factor==0)
+                    printf("    Finished Writing %d markers to PLINK %s Format \n", totmarkerCount,Format=="DS"?"Dosage":"GP");
+            }
+            else
+                printf("    Finished Reading Chunk %d of %d markers ... \n", part, bufferSize);
+
             if(Type=="mach")
             {
 
-                    if(Format=="DS")
-                        printf("    Writing Chunk %d of %d markers to MaCH Dosage Format ... \n", part, bufferSize);
-                    else
-                        printf("    Writing Chunk %d of %d markers to MaCH GP Format ... \n", part, bufferSize);
-                    machPartial = ifopen(outFile + ".output.part."+part + (gzip ? ".gz" : ""), "wb", gzip ?InputFile::BGZF:InputFile::UNCOMPRESSED);
-                    for (int i = 0; i < numSamplesRead; i++)
+                machPartial = ifopen(outFile + ".output.part."+part + (gzip ? ".gz" : ""), "wb", gzip ?InputFile::BGZF:InputFile::UNCOMPRESSED);
+                for (int i = 0; i < numSamplesRead; i++)
+                {
+                    for (int j = 0; j < markerCount; j++)
                     {
-                        for (int j = 0; j < markerCount; j++)
-                        {
-                            if(Format=="DS")
-                                ifprintf(machPartial,"\t%.3f",dosage[j][i]);
-                            else
-                                ifprintf(machPartial,"\t%.3f\t%.3f",GP1[j][i],GP2[j][i]);
-                        }
-
-                        ifprintf(machPartial,"\n");
+                        if(Format=="DS")
+                            ifprintf(machPartial,"\t%.3f",dosage[j][i]);
+                        else
+                            ifprintf(machPartial,"\t%.3f\t%.3f",GP1[j][i],GP2[j][i]);
                     }
-                    ifclose(machPartial);
+
+                    ifprintf(machPartial,"\n");
                 }
+                ifclose(machPartial);
+
+                if(Format=="DS")
+                    printf("    Finished Writing Chunk %d of %d markers to MaCH Dosage Format ... \n", part, bufferSize);
+                else
+                    printf("    Finished Writing Chunk %d of %d markers to MaCH GP Format ... \n", part, bufferSize);
+
+            }
 
             part++;
 
@@ -502,7 +589,7 @@ bool HaplotypeSet::WriteMachFile()
 
         for(int j=0;j<numSamplesRead;j++)
         {
-            if(j%1000==0)
+            if(j%500==0)
             {
                   printf("     Merging Sample %d of %d to MaCH File ...", j + 1, numSamplesRead);
                 cout<<endl;
@@ -610,7 +697,7 @@ bool HaplotypeSet::LoadInfoFile(String filename)
 
     VariantList.clear();
     string name,refAlleleString,altAlleleString;
-    string MajAlleleString,MinAlleleString;
+//    string MajAlleleString,MinAlleleString;
     int bp=100;
     string chr="Z";
     char *pch,*end_str1;
@@ -662,33 +749,33 @@ bool HaplotypeSet::LoadInfoFile(String filename)
             else
                 altAlleleString=pch;
 
-            pch = strtok_r (NULL, "\t", &end_str1);
-            if(pch==NULL)
-            {
-                cout<<"\n Info file does NOT have 14 columns at Row : "<<RowNo<<endl;
-                cout<<" Please verify the following file : "<<filename<<endl;
-                return false;
-            }
-            else
-                MajAlleleString=pch;
-
-            pch = strtok_r (NULL, "\t", &end_str1);
-            if(pch==NULL)
-            {
-                cout<<"\n Info file does NOT have 14 columns at Row : "<<RowNo<<endl;
-                cout<<" Please verify the following file : "<<filename<<endl;
-                return false;
-            }
-            else
-                MinAlleleString=pch;
+//            pch = strtok_r (NULL, "\t", &end_str1);
+//            if(pch==NULL)
+//            {
+//                cout<<"\n Info file does NOT have 14 columns at Row : "<<RowNo<<endl;
+//                cout<<" Please verify the following file : "<<filename<<endl;
+//                return false;
+//            }
+//            else
+//                MajAlleleString=pch;
+//
+//            pch = strtok_r (NULL, "\t", &end_str1);
+//            if(pch==NULL)
+//            {
+//                cout<<"\n Info file does NOT have 14 columns at Row : "<<RowNo<<endl;
+//                cout<<" Please verify the following file : "<<filename<<endl;
+//                return false;
+//            }
+//            else
+//                MinAlleleString=pch;
 
             tempVariant.assignRefAlt(refAlleleString,altAlleleString);
-            tempVariant.assignMajMin(MajAlleleString,MinAlleleString);
+//            tempVariant.assignMajMin(MajAlleleString,MinAlleleString);
 
-            if(refAlleleString.compare(altAlleleString)==0)
-                tempVariant.assignSwap(true);
-            else
-                tempVariant.assignSwap(false);
+//            if(refAlleleString.compare(altAlleleString)==0)
+//                tempVariant.assignSwap(true);
+//            else
+//                tempVariant.assignSwap(false);
 
             VariantList.push_back(tempVariant);
             line.clear();

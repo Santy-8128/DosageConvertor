@@ -116,48 +116,25 @@ class HaplotypeSet
         String removeSam;
         vector<double>      Recom,Error;
         vector<string> markerName;
-		vector<string> individualName;
+		vector<string> individualName,familyName;
 		vector<int> SampleNoHaplotypes;
 		vector<char> refAlleleList,major, minor;
 		vector<bool> missing, MarkerIndices;
 		vector<variant> VariantList;
         string finChromosome;
 		bool allowMissing, vcfType,m3vcfxType,machType;
-
+        int BufferSize;
         String VcfDose;
-        String Info;
+        String Info,IdDelimiter;
         String outFile;
         bool gzip;
         String Format;
         String Type;
 
         bool WriteMachFile();
-//        numHaplotypes = 0;
-//        numMarkers = 0;
-//        ReducedStructureInfo.clear();
-//        alleleFreq.clear();
-//        //haplotypes.clear();
-//        individualName.clear();
-//        SampleNoHaplotypes.clear();
-//
-//
-//        markerName.clear();
-//        refAlleleList.clear();
-//        major.clear();
-//        minor.clear();
-//        missing.clear();
-//        MarkerIndices.clear();
-//        allowMissing = true;
-//        vcfType = false;
-//        m3vcfxType=false;
-//        machType=false;
-//        PrintStartIndex=0;
-//        PrintEndIndex=0;
-//        Recom.clear();
-//        Error.clear();
 
-
-        HaplotypeSet(String vcfDose, String info, String Outfile,bool Gzip,String format,String type)
+        HaplotypeSet(String vcfDose, String info, String Outfile,bool Gzip,
+                     String format,String type,String idDelimiter,int bufferSize)
         {
             VcfDose=vcfDose;
             Info=info;
@@ -165,6 +142,8 @@ class HaplotypeSet
             gzip=Gzip;
             Format=format;
             Type=type;
+            IdDelimiter=idDelimiter;
+            BufferSize=bufferSize;
 
         }
 

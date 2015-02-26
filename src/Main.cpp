@@ -20,11 +20,14 @@ int main(int argc, char ** argv)
 	String outfile = "Converted.Dosage";
 	String format = "DS";
 	String type = "mach", errFile = "",chr="",golden="";
-	int max_indiv = 0, max_marker = 0;
+	String idDelimiter = "";
+//	int max_indiv = 0, max_marker = 0;
     vector<bool> formatVector(3,false);
 
+    int buffer=10000;
+
 	bool  gzip = true, nobgzip = false;
-	bool  onlyRefMarkers=false, help = false, params = false;
+	bool   help = false, params = false;
 
 	ParameterList inputParameters;
 	PhoneHome::allThinning = 50;
@@ -40,15 +43,17 @@ int main(int argc, char ** argv)
 		LONG_STRINGPARAMETER("type", &type)
 		LONG_PARAMETER("nobgzip", &nobgzip)
 		LONG_PARAMETER_GROUP("Other Parameters")
+		LONG_INTPARAMETER("buffer", &buffer)
+		LONG_STRINGPARAMETER("idDelimiter", &idDelimiter)
 		LONG_PARAMETER("help", &help)
 		LONG_PARAMETER("params", &params)
 		LONG_PHONEHOME(VERSION)
 		BEGIN_LEGACY_PARAMETERS()
-		LONG_PARAMETER("onlyRefMarkers", &onlyRefMarkers)
-		LONG_STRINGPARAMETER("golden", &golden)
-		LONG_INTPARAMETER("sample", &max_indiv)
-		LONG_INTPARAMETER("marker", &max_marker)
-		LONG_STRINGPARAMETER("remove", &removeSam)
+//		LONG_PARAMETER("onlyRefMarkers", &onlyRefMarkers)
+//		LONG_STRINGPARAMETER("golden", &golden)
+//		LONG_INTPARAMETER("sample", &max_indiv)
+//		LONG_INTPARAMETER("marker", &max_marker)
+//		LONG_STRINGPARAMETER("remove", &removeSam)
 		END_LONG_PARAMETERS();
 
     int start_time = time(0);
@@ -80,6 +85,7 @@ int main(int argc, char ** argv)
 	{
 		cout<< " Missing \"--vcfDose\", a required parameter.\n\n";
 		cout<< " Try \"--help\" for usage ...\n\n";
+		cout<< " Program Exiting ...\n\n";
 		compStatus="Command.Line.Error";
 		PhoneHome::completionStatus(compStatus.c_str());
 		return(-1);
@@ -89,6 +95,7 @@ int main(int argc, char ** argv)
 	{
 		cout<< " Missing \"--info\", a required parameter.\n\n";
 		cout<< " Try \"--help\" for usage ...\n\n";
+		cout<< " Program Exiting ...\n\n";
 		compStatus="Command.Line.Error";
 		PhoneHome::completionStatus(compStatus.c_str());
 		return(-1);
@@ -116,11 +123,34 @@ int main(int argc, char ** argv)
 		return(-1);
 	}
 
+    if(buffer<=0)
+    {
+        cout<< " Invalid input for parameter \"--buffer\" : "<<buffer<<endl;
+        cout<< " \"--buffer\"  can only take Positive Integers ...\n";
+        cout<< " Try \"--help\" for usage ...\n\n";
+        cout<< " Program Exiting ...\n\n";
+        compStatus="Command.Line.Error";
+        PhoneHome::completionStatus(compStatus.c_str());
+        return(-1);
+    }
+    else
+    {
+        if((string)temptype=="plink")
+        {
+            cout<< " WARNING: Parameter \"--buffer\" will be ignored when be used with \"--type\" = PLINK !!!"<< endl<<endl;
+        }
 
-     type=(String)temptype;
 
 
-    HaplotypeSet inputDose(vcfDose, info, outfile,gzip,format,type);
+    }
+
+
+
+
+    type=(String)temptype;
+
+
+    HaplotypeSet inputDose(vcfDose, info, outfile,gzip,format,type,idDelimiter,buffer);
 
     cout<<" ------------------------------------------------------------------------------"<<endl;
     cout<<"                             INPUT VCF DOSAGE FILE                             "<<endl;
@@ -167,7 +197,7 @@ void DosageConvertorVersion()
 	printf("\n\n -------------------------------------------------------------------------------- \n");
 	printf("          DosageConvertor - Converting Dosage from Minimac3 to other Formats     \n");
 	printf(" --------------------------------------------------------------------------------\n");
-    printf(" (c) 2014 - Sayantan Das \n");
+    printf(" (c) 2015 - Sayantan Das \n");
 //	printf(" Version	: Undocumented Release\n");
 //	printf(" Built		: sayantan\n\n");
 	cout<<"\n Version: " << VERSION<< ";\n Built: " << DATE << " by " << USER << std::endl;
@@ -177,20 +207,27 @@ void helpFile()
 {
 
   printf("\n URL = http://genome.sph.umich.edu/wiki/DosageConvertor\n");
+  printf(" GIT = https://github.com/Santy-8128/DosageConvertor\n");
 
 
     printf("\n DosageConvertor converts dosage files from minimac3 to other formats.\n");
 
 
-	printf("\n Usage: ./DosageConvertor  --vcfDose    TestDataImputedVCF.dose.vcf.gz");
-	printf("\n                           --info       TestDataImputedVCF.info");
-	printf("\n                           --prefix     OutputFilePrefix");
-	printf("\n                           --type       plink OR mach   // depending on output format");
-	printf("\n                           --format     DS or GP        // based on if you want to output");
-	printf("\n                                                        // dosage (DS) or genotype prob (GP)");
+	printf("\n Usage: ./DosageConvertor  --vcfDose      TestDataImputedVCF.dose.vcf.gz");
+	printf("\n                           --info         TestDataImputedVCF.info");
+	printf("\n                           --prefix       OutputFilePrefix");
+	printf("\n                           --type         plink OR mach   // depending on output format");
+	printf("\n                           --format       DS or GP        // based on if you want to output");
+	printf("\n                                                          // dosage (DS) or genotype prob (GP)");
+    printf("\n                           --buffer       10000           // Number of Markers to import and ");
+	printf("\n                                                          // print at a time (valid only for ");
+	printf("\n                                                          // MaCH format)");
+    printf("\n                           --idDelimiter  _               // Delimiter to Split VCF Sample ID into");
+	printf("\n                                                          // FID and IID for PLINK format ");
 
     printf("\n\n URL = http://genome.sph.umich.edu/wiki/DosageConvertor\n");
-      printf(" Visit website for more details ...\n");
+    printf(" GIT = https://github.com/Santy-8128/DosageConvertor\n");
+  printf("\n Visit website for more details ...\n");
 
 cout<<endl<<endl;
 	return;
