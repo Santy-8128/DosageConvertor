@@ -14,5 +14,5 @@ DosageConvertor is a C++ tool to convert dosage files (in VCF format) from Minim
                            --idDelimiter  _               // Delimiter to Split VCF Sample ID into
                                                           // FID and IID for PLINK format
 
-
+ 
 <<< SEE http://genome.sph.umich.edu/wiki/DosageConvertor FOR DOCUMENTATION >>>
