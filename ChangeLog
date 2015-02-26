@@ -11,6 +11,16 @@ Date	: February 21 2015
     	First Draft. It will import from GP, DS, and GT format in VCF
     	file. It will output both dosage and genotype probabilities.
     	It will also output both PLINK and MaCH files.
+    	
+--------------------------------------------------------------------------
 
+Version	: 1.0.2
+Author	: Sayantan Das
+Date	: February 26 2015
+
+    	Added handle --idDelimiter for splitting FID and IID.
+    	Added handle --buffer to control number of variants loaded.
+        Improved memory handling for PLINK output.
+        
 --------------------------------------------------------------------------
 
