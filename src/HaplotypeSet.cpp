@@ -630,11 +630,21 @@ bool HaplotypeSet::WriteMachFile()
         IFILE ifs = ifopen(Info, "r");
         machFinal = ifopen(outFile + ".mach.info",  "wb", InputFile::UNCOMPRESSED);
 
+
         line.clear();
-        while ((ifs->readLine(line))!=-1)
+        int Indic=ifs->readLine(line);
+
+        while(Indic==-1 ||  Indic==0)
         {
+            if(Indic==-1 && line.length()==0)
+            {
+                break;
+            }
+
             ifprintf(machFinal,"%s\n",line.c_str());
             line.clear();
+            Indic=ifs->readLine(line);
+
         }
         ifclose(machFinal);
 
@@ -711,8 +721,16 @@ bool HaplotypeSet::LoadInfoFile(String filename)
     {
         ifs->readLine(line);
         line.clear();
-        while ((ifs->readLine(line))!=-1)
+        int Indic=ifs->readLine(line);
+
+        while(Indic==-1 ||  Indic==0)
         {
+
+            if(Indic==-1 && line.length()==0)
+            {
+                break;
+            }
+
 
             RowNo++;
             pch = strtok_r ((char*)line.c_str(),"\t", &end_str1);
@@ -761,7 +779,7 @@ bool HaplotypeSet::LoadInfoFile(String filename)
 //
 //            pch = strtok_r (NULL, "\t", &end_str1);
 //            if(pch==NULL)
-//            {
+//     ifs       {
 //                cout<<"\n Info file does NOT have 14 columns at Row : "<<RowNo<<endl;
 //                cout<<" Please verify the following file : "<<filename<<endl;
 //                return false;
@@ -779,6 +797,8 @@ bool HaplotypeSet::LoadInfoFile(String filename)
 
             VariantList.push_back(tempVariant);
             line.clear();
+
+            Indic=ifs->readLine(line);
 
         }
     }
