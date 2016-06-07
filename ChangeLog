@@ -4,6 +4,27 @@ This file contains the set of changes that have gone into this program.
 DosageConvertor Changes:
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
+
+Version : 1.0.3
+Author  : Sayantan Das
+Date    : June 6 2016
+
+        Added the option where conversion can take place from ONLY VCF file.
+	If info file is NOT provided, the output MaCH info file will have 
+	missing/empty columns. Added filter so only autosomes can be used.
+
+--------------------------------------------------------------------------
+
+Version : 1.0.2
+Author  : Sayantan Das
+Date    : February 26 2015
+
+        Added handle --idDelimiter for splitting FID and IID.
+        Added handle --buffer to control number of variants loaded.
+        Improved memory handling for PLINK output.
+
+--------------------------------------------------------------------------
+
 Version	: 1.0.1
 Author	: Sayantan Das
 Date	: February 21 2015
@@ -13,14 +34,3 @@ Date	: February 21 2015
     	It will also output both PLINK and MaCH files.
     	
 --------------------------------------------------------------------------
-
-Version	: 1.0.2
-Author	: Sayantan Das
-Date	: February 26 2015
-
-    	Added handle --idDelimiter for splitting FID and IID.
-    	Added handle --buffer to control number of variants loaded.
-        Improved memory handling for PLINK output.
-        
---------------------------------------------------------------------------
-

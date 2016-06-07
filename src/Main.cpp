@@ -20,8 +20,7 @@ int main(int argc, char ** argv)
 	String outfile = "Converted.Dosage";
 	String format = "DS";
 	String type = "mach", errFile = "",chr="",golden="";
-	String idDelimiter = "";
-//	int max_indiv = 0, max_marker = 0;
+	String idDelimiter = "",MyChromosome="";
     vector<bool> formatVector(3,false);
 
     int buffer=10000;
@@ -36,7 +35,6 @@ int main(int argc, char ** argv)
 		LONG_PARAMETER_GROUP("Input Dosage")
 		LONG_STRINGPARAMETER("vcfDose", &vcfDose)
 		LONG_STRINGPARAMETER("info", &info)
-		//LONG_PARAMETER("rsid", &rsid)
 		LONG_PARAMETER_GROUP("Output Parameters")
 		LONG_STRINGPARAMETER("prefix", &outfile)
 		LONG_STRINGPARAMETER("format", &format)
@@ -49,7 +47,7 @@ int main(int argc, char ** argv)
 		LONG_PARAMETER("params", &params)
 		LONG_PHONEHOME(VERSION)
 		BEGIN_LEGACY_PARAMETERS()
-//		LONG_PARAMETER("onlyRefMarkers", &onlyRefMarkers)
+		LONG_STRINGPARAMETER("MyChromosome", &MyChromosome)
 //		LONG_STRINGPARAMETER("golden", &golden)
 //		LONG_INTPARAMETER("sample", &max_indiv)
 //		LONG_INTPARAMETER("marker", &max_marker)
@@ -91,14 +89,30 @@ int main(int argc, char ** argv)
 		return(-1);
 	}
 
-	if (info == "")
-	{
-		cout<< " Missing \"--info\", a required parameter.\n\n";
+    if((string)temptype!="mach" && (string)temptype!="plink")
+    {
+		cout<< " Invalid input for \"--type\" parameter : "<<type<<endl;
+		cout<< " Parameter must be equal to \"mach\" or \"plink\" ..."<<endl<<endl;
 		cout<< " Try \"--help\" for usage ...\n\n";
 		cout<< " Program Exiting ...\n\n";
 		compStatus="Command.Line.Error";
 		PhoneHome::completionStatus(compStatus.c_str());
 		return(-1);
+	}
+
+
+	if (info == "")
+	{
+        if((string)temptype=="mach")
+        {
+            cout<<" ------------------------------------------------------------------------------"<<endl;
+            cout<<"                                   WARNING !!!                                 "<<endl;
+            cout<<" ------------------------------------------------------------------------------"<<endl<<endl;
+
+            cout<< " WARNING: Missing \"--info\" parameter.\n";
+            cout<< " Final MaCH info file will have some missing columns.\n";
+            cout<< " Please use INFO file from Minimac3 for complete MaCH info file ... \n\n";
+        }
 	}
 
 	if(format!="GP" && format!="DS")
@@ -112,16 +126,6 @@ int main(int argc, char ** argv)
 		return(-1);
 	}
 
-	if((string)temptype!="mach" && (string)temptype!="plink")
-    {
-		cout<< " Invalid input for \"--type\" parameter : "<<type<<endl;
-		cout<< " Parameter must be equal to \"mach\" or \"plink\" ..."<<endl<<endl;
-		cout<< " Try \"--help\" for usage ...\n\n";
-		cout<< " Program Exiting ...\n\n";
-		compStatus="Command.Line.Error";
-		PhoneHome::completionStatus(compStatus.c_str());
-		return(-1);
-	}
 
     if(buffer<=0)
     {
@@ -150,7 +154,7 @@ int main(int argc, char ** argv)
     type=(String)temptype;
 
 
-    HaplotypeSet inputDose(vcfDose, info, outfile,gzip,format,type,idDelimiter,buffer);
+    HaplotypeSet inputDose(vcfDose, info, outfile,gzip,format,type,idDelimiter,buffer,MyChromosome);
 
     cout<<" ------------------------------------------------------------------------------"<<endl;
     cout<<"                             INPUT VCF DOSAGE FILE                             "<<endl;
@@ -214,7 +218,7 @@ void helpFile()
 
 
 	printf("\n Usage: ./DosageConvertor  --vcfDose      TestDataImputedVCF.dose.vcf.gz");
-	printf("\n                           --info         TestDataImputedVCF.info");
+	printf("\n                           --info         TestDataImputedVCF.info (NOT mandatory)");
 	printf("\n                           --prefix       OutputFilePrefix");
 	printf("\n                           --type         plink OR mach   // depending on output format");
 	printf("\n                           --format       DS or GP        // based on if you want to output");
