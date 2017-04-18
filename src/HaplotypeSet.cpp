@@ -368,8 +368,8 @@ bool HaplotypeSet::ConvertDosageData()
                              VariantList[totmarkerCount].name.c_str(),
                              VariantList[totmarkerCount].bp);
                     ifprintf(plinkMain,"%s\t%s\t%s",VariantList[totmarkerCount].name.c_str(),
-                             VariantList[totmarkerCount].altAlleleString.c_str(),
-                             VariantList[totmarkerCount].refAlleleString.c_str());
+                             VariantList[totmarkerCount].refAlleleString.c_str(),
+                             VariantList[totmarkerCount].altAlleleString.c_str());
 
                     for (int i = 0; i < numSamplesRead; i++)
                     {
