@@ -1,4 +1,4 @@
-DosageConvertor is a C++ tool to convert dosage files (in VCF format) from Minimac3 to ther formats such as MaCH or PLINK.
+DosageConvertor is a C++ tool to convert dosage files (in VCF format) from Minimac3/4 to ther formats such as MaCH or PLINK.
 
 <<< SEE http://genome.sph.umich.edu/wiki/DosageConvertor FOR DOCUMENTATION >>>
 
