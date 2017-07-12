@@ -5,6 +5,14 @@ DosageConvertor Changes:
 --------------------------------------------------------------------------
 --------------------------------------------------------------------------
 
+Version : 1.0.4
+Author  : Sayantan Das
+Date    : July 12 2017
+
+        Added support for chromosome X that allows all different ploidy
+	Improved VCF reading interface and improved plink out files
+--------------------------------------------------------------------------
+
 Version : 1.0.3
 Author  : Sayantan Das
 Date    : June 6 2016
