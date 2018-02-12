@@ -518,7 +518,7 @@ bool HaplotypeSet::LoadInfoFromVCFfile()
 
         VcfRecordInfo& ThisInfo=record.getInfo();
 
-        if(ThisInfo.getString("TYPED")!=NULL)
+        if(ThisInfo.getString("TYPED")!=NULL || ThisInfo.getString("ER2")!=NULL)
         {
             tempVariant.genotyped=true;
             tempVariant.Tag="Genotyped";
@@ -535,7 +535,9 @@ bool HaplotypeSet::LoadInfoFromVCFfile()
             tempVariant.Maf=*ThisInfo.getString("MAF");
 
         if(ThisInfo.getString("R2")!=NULL)
+        {
             tempVariant.Rsq=*ThisInfo.getString("R2");
+        }
         else
         {
             if(!tempVariant.genotyped_only)
@@ -544,13 +546,22 @@ bool HaplotypeSet::LoadInfoFromVCFfile()
             }
         }
 
+
         if(ThisInfo.getString("ER2")!=NULL)
         {
             if(!tempVariant.genotyped)
             {
-                return PrintErr(" Variant ["+name+"] was GENOTYPED, but does NOT have ER2 in the INFO column ! ");
+                return PrintErr(" Variant ["+name+"] has ER2 in the INFO column, although it is NOT GENOTYPED ! ");
             }
             tempVariant.Ersq=*ThisInfo.getString("ER2");
+        }
+        else
+        {
+            if(tempVariant.genotyped)
+            {
+                return PrintErr(" Variant ["+name+"] was GENOTYPED, but does NOT have ER2 in the INFO column ! ");
+            }
+
         }
 
 
@@ -822,7 +833,7 @@ bool HaplotypeSet::CheckValidChrom(string chr)
     std::vector<string> ValidChromList (temp, temp + sizeof(temp) / sizeof(string) );
 
     for(int counter=0;counter<(int)ValidChromList.size();counter++)
-        if(chr==ValidChromList[counter])
+        if(chr==ValidChromList[counter] || chr=="chr"+ValidChromList[counter])
             result=true;
 
     return result;
