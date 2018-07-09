@@ -2,8 +2,6 @@ DosageConvertor is a C++ tool to convert dosage files (in VCF format) from Minim
 
 <<< SEE http://genome.sph.umich.edu/wiki/DosageConvertor FOR DOCUMENTATION >>>
 
- To install, type the following in the main folder: bash install.sh
- 
 Users should follow the following steps to compile DosageConvertor 
 
 ## Prerequisites
@@ -52,7 +50,7 @@ make                                                    # Build.
 ## Usage
 
 
- Usage: ./DosageConvertor  --vcfDose      TestDataImputedVCF.dose.vcf.gz
+  ```    ./DosageConvertor  --vcfDose      TestDataImputedVCF.dose.vcf.gz
                            --info         TestDataImputedVCF.info
                            --prefix       OutputFilePrefix
                            --type         plink OR mach   // depending on output format
@@ -62,7 +60,7 @@ make                                                    # Build.
                                                           // print at a time (valid only for
                                                           // MaCH format)
                            --idDelimiter  _               // Delimiter to Split VCF Sample ID into
-                                                          // FID and IID for PLINK format
+                                                          // FID and IID for PLINK format ```
 
  
 <<< SEE http://genome.sph.umich.edu/wiki/DosageConvertor FOR DOCUMENTATION >>>
