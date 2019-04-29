@@ -825,7 +825,7 @@ bool HaplotypeSet::CheckValidChrom(string chr)
 {
     bool result=false;
 
-    if(MyChromosome!="" && chr==MyChromosome)
+    if(MyChromosome!="" && chr==MyChromosome.c_str())
         return true;
 
     string temp[]={"1","2","3","4","5","6","7","8","9","10","11"
