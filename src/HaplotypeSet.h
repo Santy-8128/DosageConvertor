@@ -73,7 +73,7 @@ class HaplotypeSet
 		int         numHaplotypes,numSamples;
 		int         numMarkers;
 		bool        IsInfo;
-		string MyChromosome;
+		String MyChromosome;
 
         vector<variant> VariantList;
 		vector<vector<float> > dosage;
@@ -164,7 +164,7 @@ class HaplotypeSet
             IdDelimiter=idDelimiter;
             BufferSize=bufferSize;
             tag=Tag;
-            MyChromosome=myChromosome.c_str();
+            MyChromosome=myChromosome;
         }
 
         int checkValidity()
